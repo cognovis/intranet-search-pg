@@ -44,3 +44,41 @@ set invoice_nr = invoice_nr;
 
 
 
+
+-----------------------------------------------------------
+-- Updated project function with translation fields
+-- (hard coded, no DynField yet)
+
+create or replace function im_projects_tsearch ()
+returns trigger as '
+declare
+        v_string        varchar;
+        v_string2        varchar;
+begin
+        select  coalesce(project_name, '''') || '' '' ||
+                coalesce(project_nr, '''') || '' '' ||
+                coalesce(project_path, '''') || '' '' ||
+                coalesce(description, '''') || '' '' ||
+                coalesce(note, '''')
+        into    v_string
+        from    im_projects
+        where   project_id = new.project_id;
+
+        v_string2 := '''';
+        if column_exists(''im_projects'', ''company_project_nr'') then
+
+                select  coalesce(company_project_nr, '''') || '' '' ||
+                        coalesce(final_company, '''')
+                into    v_string2
+                from    im_projects
+                where   project_id = new.project_id;
+
+                v_string := v_string || '' '' || v_string2;
+
+        end if;
+
+        perform im_search_update(new.project_id, ''im_project'', new.project_id, v_string);
+
+        return new;
+end;' language 'plpgsql';
+
