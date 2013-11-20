@@ -44,7 +44,7 @@ begin
 
 	-- Map Latin1 characters into ASCII
 	v_result := '';
-	v_str := coalesce(p_str);
+	v_str := coalesce(p_str, '');
 	v_len := char_length(v_str);
 	v_asc_last := 0;
 	-- RAISE NOTICE 'norm_text: v_len=%', v_len;
